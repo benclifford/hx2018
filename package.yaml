@@ -35,6 +35,11 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - booking
+    - servant-server
+    - warp
+    default-extensions:
+    - DataKinds
+    - TypeOperators
 
 tests:
   booking-test:
