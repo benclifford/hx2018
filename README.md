@@ -169,3 +169,78 @@ If your network setup is ok, you can point a browser on another machine at
 this server (although you'll have to change the IP address) and access this
 server over the network.
 
+
+
+# 3. Implement a Haskell booking system
+
+Now we're going to put aside the web server part of this project for a while
+and build a very simple booking system that, to begin with, we'll only
+interact with inside a Haskell REPL. The plan is that once we have it working
+there, we'll wire it into the webserver we just set up.
+
+I'm going to approach this by making useful data types, and then making
+useful operations on those datatypes.
+
+I'm going to make this a really simple booking system: there will be only
+one room, and one day, and bookings can only start and end on hourly 
+boundaries.
+
+## 3.0 A `Booking` datatype with a smart constructor
+
+The first thing to represent is a single booking - which we will
+represent with a `Booking` Haskell type, in a simple record style.
+
+This goes in `src/Lib.hs`:
+
+```
+data Booking = Booking {
+    _start :: Int,
+    _end :: Int,
+    _description :: T.Text
+  } deriving Show
+```
+
+Now we can load this into a REPL, such as `stack repl`, and create
+some bookings.
+
+But we can also create bookings that
+don't make sense: for example, the end time can be after the start time,
+or the numbers can be negative, or later than 24 (= midnight).
+
+So we might always be a little unsure in our code if we should be checking
+for invalid cases like that.
+
+One way to solve this: Instead of allowing anyone to call the `Booking`
+constructor, we can restrict access so only our library code can call it.
+If something else, like our application code, wants to create a booking,
+it has to use some kind of helper function exposed by the library, a so-called
+"smart constructor". That smart constructor can guard access to the real
+constructor, and throw errors if it doesn't like what it sees.
+
+The `Booking` constructor takes some parameters and returns a Booking,
+always. But a smart constructor might not return a booking, if it doesn't
+like the parameters. What then can it return instead?
+
+We'll use a common pattern of representing errors using the Either type:
+
+```
+mkBooking :: Int -> Int -> T.Text -> Either String Booking
+```
+
+The constructor will return either a Booking (on the right, if the
+parameters are "right", ahaha), or if something isn't Right, it is
+Left, and we can represent the error there in some error type -
+I'm just going to use String here and stick in human readable messages.
+
+Compare that to throwing exceptions. We're declaring the type of errors
+that might come back: `String`. But when an error comes back there isn't
+some inbuilt change in program flow - the result is just a value, just
+as much as a correcting Booking result is.
+
+We can export the smart constructor, and not export the real constructor,
+and then at the REPL, try creating bookings.
+
+Note, though, that a booking that comes back is always wrapped inside
+a Right constructor - we don't have a function any more that will give
+us a pure Booking.
+
