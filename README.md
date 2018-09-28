@@ -227,7 +227,7 @@ We'll use a common pattern of representing errors using the Either type:
 mkBooking :: Int -> Int -> T.Text -> Either String Booking
 ```
 
-The constructor will return either a Booking (on the right, if the
+This smart constructor will return either a Booking (on the right, if the
 parameters are "right", ahaha), or if something isn't Right, it is
 Left, and we can represent the error there in some error type -
 I'm just going to use String here and stick in human readable messages.
@@ -243,4 +243,62 @@ and then at the REPL, try creating bookings.
 Note, though, that a booking that comes back is always wrapped inside
 a Right constructor - we don't have a function any more that will give
 us a pure Booking.
+
+## 3.1 Collections of bookings
+
+How can we store a collection of bookings that people have made?
+
+The simplest type is a list, `type Bookings = [Booking]`
+
+We can create a couple of bookings, and put them into a list.
+
+Remember we can't just get a booking value, though - it is always wrapped
+in an either.
+
+So I can't just write:
+
+```
+[mkBooking 1 2 "first", mkBooking 3 4 "second"]
+```
+
+because that would give us a list of type [Either String Booking] - we would
+have a list where each element was either a booking or an error message about
+that attempt at booking.
+
+We can use `do` notation:
+
+do { a <- mkBooking 1 2 "first"; b <- mkBooking 3 4 "second"; return [a,b] }
+
+what comes back *isn'* a pure Bookings list - this monadic notation has
+wrapped up the Bookings list inside a similar looking Either type.
+
+If we break one of the bookings, for example by giving it a bad end time,
+we can see that no list is returned and we get an appropriate error message
+instead.
+
+
+There's some more validity checking we could do in this way: if two valid
+bookings overlap in time, then they can't go in a collection of bookings
+together. In that case, it wouldn't be the individual booking objects that
+would be badly formed, but the list of bookings.
+
+We can apply similar techniques: we can make a new list type for
+bookings, with smart constructors for cons and nil; and we can have
+those two smart constructors refuse to construct invalid collections of
+bookings.
+
+XXXX
+
+3.1 we don't check that bookings can't overlap: for example this succeeds, but I'd like it to fail, because
+booking B overlaps booking A.
+
+*Main Lib> do { a <- mkBooking 9 17 "A" ; b <- mkBooking 15 21 "B" ; b1 <- consBooking a [] ; consBooking b b1 }
+Right [Booking {_start = 15, _end = 21, _description = "B"},Booking {_start = 9, _end = 17, _description = "A"}]
+
+So lets enhance our smart-cons-constructor to check the new proposed booking against what we have already
+
+In the example, use non-monadic `if`, instead of `when` style validators. hopefully can see how to convert between those two formats.
+
+TODO: can we drive STM from the repl here to give a persistent state? that works better maybe with the story that we then say
+"we want to do what we were doing at the REPL, but using HTTP calls"
 

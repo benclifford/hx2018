@@ -1,6 +1,8 @@
 module Lib
     ( someFunc
     , mkBooking
+    , consBooking
+    , overlaps
     ) where
 
 import qualified Data.Text as T
@@ -9,6 +11,8 @@ import Control.Monad (when)
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
+
+data Bookings = Bookings [Booking] deriving Show
 
 data Booking = Booking {
     _start :: Int,
@@ -25,3 +29,20 @@ mkBooking s e d = do
 
   Right (Booking s e d) -- Right a.k.a. pure
 
+-- c.f. (:) :: Booking -> Bookings -> Bookings 
+consBooking :: Booking -> Bookings -> Either String Bookings
+consBooking b (Bookings bs) =
+  if or (map (overlaps b) bs)
+  then Left "new booking overlaps existing booking"
+  else pure (Bookings (b : bs))
+
+
+{-
+see https://stackoverflow.com/questions/3269434/whats-the-most-efficient-way-to-test-two-integer-ranges-for-overlap
+for discussion of range overlaps
+-}
+
+-- checks if two bookings overlap
+overlaps :: Booking -> Booking -> Bool
+overlaps (Booking l_start l_end _)
+         (Booking r_start r_end _) = l_start < r_end && r_start < l_end
