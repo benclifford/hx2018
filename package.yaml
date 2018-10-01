@@ -29,6 +29,8 @@ library:
   dependencies:
   - aeson
   - text
+  default-extensions:
+  - OverloadedStrings
 
 executables:
   booking-exe:

@@ -399,3 +399,55 @@ so letes implement that...
 rather this:
 curl -X POST -H "Content-Type: application/json" -d '{"_start":3, "_end":4, "_description":"hi"}' --verbose  http://172.17.0.2:8080/bookings
 
+# 8. Smart constructors vs FromJSON
+
+8. ... now we can make bookings with a POST.
+
+Except badness!
+
+That fromJSON instance means we can now construct arbitrary Booking objects - we've exposed a new constructor that is too liberal,
+circumventing our desire to expose a safe API...
+
+For example, you can now make this booking:
+
+curl -X POST -H "Content-Type: application/json" -d '{"_start":1, "_end":-1, "_description":"hi"}' --verbose  http://172.17.0.2:8080/bookings
+
+which ends at -1, so it is invalid in two ways: the end time is before the start, and the end time is less than 0.
+
+So we can't really allow this arbitrary Generic FromJSON  for Booking if we want the existence of a Booking object to mean
+that it is well formed.
+
+Instead, can we write our own FromJSON instance, which does a bit more checking?
+Yes!
+
+FromJSON can already fail in some cases - for example, if you don't specify all the necessary fields for the constructor.
+
+We can see this at the repl, away from the webserver:
+
+
+import Data.Aeson
+
+an invalid one:
+*Main Lib Data.Aeson> eitherDecode "{}" :: Either String Booking
+Left "Error in $: key \"_start\" not present"
+
+and a "valid" one that we'd like to be invalid:
+
+*Main Lib Data.Aeson> eitherDecode "{\"_start\":12, \"_end\":-1, \"_description\":\"test\"}" :: Either String Booking
+Right (Booking {_start = 12, _end = -1, _description = "test"})
+
+(we've got that same left/right error pattern here... an error string or the "Right" value)
+
+
+So let's get rid of that broken FromJSON derived instance ... (after removing FromJSON, we'll get a compile error - because we now have no description of how to convert JSON to a Booking)
+
+... and replace it with something more manually written.
+
+We use applicative notation, but instead of applying the parameters to the base constructor, we apply them to the
+smart constructor - and then put in the case for correctly working and for failing.
+
+Unfortunately the nice error message we can supply here doesn't go anywhere useful by default, which is a shame.
+But at least we can't make invalid bookings now.
+
+
+

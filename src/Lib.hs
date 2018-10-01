@@ -20,6 +20,7 @@ module Lib
 
 import qualified GHC.Generics as G
 import qualified Data.Aeson as A
+import Data.Aeson ( (.:) )
 import qualified Data.Text as T
 import qualified Control.Concurrent.STM as STM
 
@@ -39,7 +40,19 @@ data Booking = Booking {
     _start :: Int,
     _end :: Int,
     _description :: T.Text
-  } deriving (Show, G.Generic, A.ToJSON, A.FromJSON)
+  } deriving (Show, G.Generic, A.ToJSON)
+
+instance A.FromJSON Booking where
+  parseJSON (A.Object o) = do
+    v <- mkBooking
+           <$> (o .: "_start")
+           <*> (o .: "_end")
+           <*> (o .: "_description")
+    case v of
+      Right booking -> return booking
+      Left err -> fail err
+
+  parseJSON otherwise = fail "expected object"
 
 mkBooking :: Int -> Int -> T.Text -> Either String Booking
 mkBooking s e d = do
