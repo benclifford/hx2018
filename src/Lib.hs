@@ -8,8 +8,9 @@ module Lib
     , overlaps
     , mkEmptyBookingDB
     , addBooking
-    , Booking()
+    , Booking(..)
     , Bookings
+    , bookingsList
     ) where
 
 -- TODO: at some point, comment on these two import styles
@@ -28,6 +29,11 @@ someFunc :: IO ()
 someFunc = putStrLn "someFunc"
 
 data Bookings = Bookings [Booking] deriving (Show, G.Generic, A.ToJSON)
+
+-- this is safe because I don't mind exposing the list...
+-- I just don't want people *constructing* their own list
+bookingsList :: Bookings -> [Booking]
+bookingsList (Bookings bs) = bs 
 
 data Booking = Booking {
     _start :: Int,

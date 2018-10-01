@@ -355,3 +355,11 @@ If we were specifying an API properly, maybe we'd want to implement to JSON <-> 
 explicitly.
 
 
+# 6. Capturing part of a URL as a parameter
+
+6.3 now we can capture a field and use it.
+in the simplest impl, we now expose the constructors of Booking so that _start is accessible.
+Maybe there's a way to expose _start as an accessor without exposing a constructor: we don't have
+a problem with people seeing the insides of a booking - just not constructing arbitrary ones...
+
+
