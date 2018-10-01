@@ -1,3 +1,6 @@
+{-# Language DeriveGeneric #-}
+{-# Language DeriveAnyClass #-}
+
 module Lib
     ( someFunc
     , mkBooking
@@ -13,6 +16,9 @@ module Lib
 -- - specifically how I personally prefer to never import something
 -- that you cannot figure out where it was imported from by looking
 -- at the import list (so either by name, or by qualifier)
+
+import qualified GHC.Generics as G
+import qualified Data.Aeson as A
 import qualified Data.Text as T
 import qualified Control.Concurrent.STM as STM
 
@@ -21,13 +27,13 @@ import Control.Monad (when)
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
 
-data Bookings = Bookings [Booking] deriving Show
+data Bookings = Bookings [Booking] deriving (Show, G.Generic, A.ToJSON)
 
 data Booking = Booking {
     _start :: Int,
     _end :: Int,
     _description :: T.Text
-  } deriving Show
+  } deriving (Show, G.Generic, A.ToJSON)
 
 mkBooking :: Int -> Int -> T.Text -> Either String Booking
 mkBooking s e d = do

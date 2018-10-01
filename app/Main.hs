@@ -15,6 +15,7 @@ import Lib
 type PingAPI = "ping" :> S.Get '[S.PlainText] String
 
 type BookingsTxtGet = "bookings.txt" :> S.Get '[S.PlainText] String
+type BookingsGet = "bookings" :> S.Get '[S.JSON] Bookings
 
 handlePing :: S.Handler String
 handlePing = return "PONG"
@@ -24,10 +25,13 @@ handleBookingsTxtGet db = liftIO $ do
   v <- STM.atomically $ STM.readTVar db
   return (show v)
 
-api :: S.Proxy (PingAPI :<|> BookingsTxtGet)
+handleBookingsGet db = liftIO $ do
+  STM.atomically $ STM.readTVar db
+
+api :: S.Proxy (PingAPI :<|> BookingsTxtGet :<|> BookingsGet)
 api = S.Proxy
 
-server db = handlePing :<|> handleBookingsTxtGet db
+server db = handlePing :<|> handleBookingsTxtGet db :<|> handleBookingsGet db
 
 app db = S.serve api (server db)
 

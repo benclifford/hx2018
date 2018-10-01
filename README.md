@@ -334,3 +334,24 @@ hard-coded example bookings.
 in haskell "Show" form - which looks roughly like haskell constructors.
 
 
+# 5. Returning a booking as JSON, with Generics
+
+6.2 but we don't want this to be haskell specific. I want to send data in a more common wire format. JSON is one common
+example of that (XML might be another)
+
+Fortunately there's a library for that - aeson
+
+with a bit of boiler plate we get:
+
+[{"_start":23,"_description":"second","_end":24},{"_start":9,"_description":"first","_end":12}]
+
+which is JSON, based on the constructor fields - with underscores in the name, like in the constructors.
+
+That's a bit awkward - but if we're going to have it do the translation automatically, then so be it.
+
+and very automatic it is - we don't do any explicit coercian from a Booking to some JSON on the wire.
+
+If we were specifying an API properly, maybe we'd want to implement to JSON <-> Booking conversion more
+explicitly.
+
+
