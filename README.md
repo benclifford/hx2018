@@ -299,6 +299,24 @@ So lets enhance our smart-cons-constructor to check the new proposed booking aga
 
 In the example, use non-monadic `if`, instead of `when` style validators. hopefully can see how to convert between those two formats.
 
-TODO: can we drive STM from the repl here to give a persistent state? that works better maybe with the story that we then say
-"we want to do what we were doing at the REPL, but using HTTP calls"
+## 3.2 A database of `Booking`s, stored in Software Transactional Memory (STM)
+
+3.2 Now drive this with STM, to let us have a single in-memory database (that gets reset every time we restart)
+
+*Main Lib Control.Concurrent.STM> db <- atomically $ newTVar [] :: IO (TVar [Booking])
+*Main Lib Control.Concurrent.STM> atomically $ readTVar db
+[]
+
+or with some helpers:
+
+*Main Lib Control.Concurrent.STM> db <- mkEmptyBookingDB 
+*Main Lib Control.Concurrent.STM> atomically $ readTVar db
+[]
+
+*Main Control.Concurrent.STM> let (Right r) = mkBooking 1 10 "first"
+*Main Control.Concurrent.STM> addBooking db r
+Left "new booking overlaps existing booking"
+
+Now all the booking logic that we'll need is implemented in this library, separate from anything to do with the web side of
+things.
 
