@@ -39,7 +39,7 @@ data Booking = Booking {
     _start :: Int,
     _end :: Int,
     _description :: T.Text
-  } deriving (Show, G.Generic, A.ToJSON)
+  } deriving (Show, G.Generic, A.ToJSON, A.FromJSON)
 
 mkBooking :: Int -> Int -> T.Text -> Either String Booking
 mkBooking s e d = do

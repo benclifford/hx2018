@@ -362,4 +362,40 @@ in the simplest impl, we now expose the constructors of Booking so that _start i
 Maybe there's a way to expose _start as an accessor without exposing a constructor: we don't have
 a problem with people seeing the insides of a booking - just not constructing arbitrary ones...
 
+6.4 the error handling is pretty poor though - if we pick a bad start time, we don't get a very
+nice response. we can pattern match and both log on the console something better, and maybe
+send a better response - eg an error code
+
+# 7. Creating bookings with an HTTP POST
+
+7. now we can read the bookings as a whole, and individual bookings - in JSON
+
+It would be nice to be able to make a booking too!
+
+Conventionally that is done by an HTTP POST (rather than an HTTP GET) to the collections URL,
+supplying the details of the new booking to make.
+
+we won't be able to generate this HTTP POST request directly from browser UI - though it might come
+from some javascript executing in a web page.
+
+First lets check we use a different client:
+
+curl --verbose  http://172.17.0.2:8080/bookings
+
+should show the bookings at command line, as in browser.
+
+curl does a GET by default.
+
+now we'll switch it to using POST:
+
+curl --verbose  http://172.17.0.2:8080/bookings
+
+...
+< HTTP/1.1 405 Method Not Allowed
+...
+
+so letes implement that...
+
+rather this:
+curl -X POST -H "Content-Type: application/json" -d '{"_start":3, "_end":4, "_description":"hi"}' --verbose  http://172.17.0.2:8080/bookings
 

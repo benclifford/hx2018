@@ -17,6 +17,7 @@ type PingAPI = "ping" :> S.Get '[S.PlainText] String
 type BookingsTxtGet = "bookings.txt" :> S.Get '[S.PlainText] String
 type BookingsGet = "bookings" :> S.Get '[S.JSON] Bookings
 type BookingGet = "bookings" :> S.Capture "id" Int :> S.Get '[S.JSON] Booking
+type BookingsPost = "bookings" :> S.ReqBody '[S.JSON] Booking :> S.Post '[S.PlainText] String
 
 handlePing :: S.Handler String
 handlePing = return "PONG"
@@ -39,10 +40,19 @@ handleBookingGet db s = do
     [] -> S.throwError S.err404
     _ -> S.throwError S.err500 -- because something is wrong internally
 
-api :: S.Proxy (PingAPI :<|> BookingsTxtGet :<|> BookingsGet :<|> BookingGet)
+handleBookingsPost :: STM.TVar Bookings -> Booking -> S.Handler String
+handleBookingsPost db booking = do
+  res <- liftIO $ addBooking db booking
+  case res of
+    Left err -> S.throwError $ S.err500 { S.errReasonPhrase = err }
+    Right bookingID -> pure (show bookingID)
+  
+  
+
+api :: S.Proxy (PingAPI :<|> BookingsTxtGet :<|> BookingsGet :<|> BookingGet :<|> BookingsPost)
 api = S.Proxy
 
-server db = handlePing :<|> handleBookingsTxtGet db :<|> handleBookingsGet db :<|> handleBookingGet db
+server db = handlePing :<|> handleBookingsTxtGet db :<|> handleBookingsGet db :<|> handleBookingGet db :<|> handleBookingsPost db
 
 app db = S.serve api (server db)
 
