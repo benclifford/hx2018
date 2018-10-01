@@ -320,3 +320,17 @@ Left "new booking overlaps existing booking"
 Now all the booking logic that we'll need is implemented in this library, separate from anything to do with the web side of
 things.
 
+
+# 4. An HTTP endpoint to retrieve a `Booking` as a string
+
+6.1
+so back to app/Main.hs...
+
+we'll iniitalise a db and hard-code in some example bookings to start with.
+
+we'll make an endpoint called /bookings.txt which will dish out the haskell list of current bookings - so we'll see the
+hard-coded example bookings.
+
+in haskell "Show" form - which looks roughly like haskell constructors.
+
+

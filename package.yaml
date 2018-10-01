@@ -44,6 +44,7 @@ executables:
     default-extensions:
     - DataKinds
     - TypeOperators
+    - OverloadedStrings
 
 tests:
   booking-test:

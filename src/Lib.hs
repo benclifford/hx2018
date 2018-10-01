@@ -6,6 +6,7 @@ module Lib
     , mkEmptyBookingDB
     , addBooking
     , Booking()
+    , Bookings
     ) where
 
 -- TODO: at some point, comment on these two import styles
