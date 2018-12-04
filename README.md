@@ -451,3 +451,41 @@ But at least we can't make invalid bookings now.
 
 
 
+
+questions people asked:
+
+  * can use multiway if instead of monadic either notation? whats the difference?
+      so multiway if doesn't need monad instance - could return anything
+      - and the control flow is a little simple - it hits the `if` and
+      comes out in one place. (a more elaborate version of the two-way
+      `if` i already used)
+      `Either` monadic form is more complicated: a particular step doesn't
+       necessarily cause a failure or a return value - indeed only the
+       last step causes a return. but we can cause a failure from deep
+       within an expression easily (by using the `Left` action) rather
+       than having to wire up manually the responses (see how in the 
+       one way `if` statement I test using `overlaps` but then I have
+       to use an `or` to combine all the test results together  - that
+       is elegant in the particalar case of overlaps and looks nice,
+       but if i have lots of different tests, any of which should cause
+       a failure, the `Left` form is better. The `Left` form also allows
+       error messages to vary by error, which a test combiner using `or` or
+       `and` doesn't - because a False value doesn't convey a reason.
+
+  * how does this work in a cloud setting?
+     you can run as many instances of this as you want and route requests
+     to them. what needs to be shared? the database (and STM doesn't
+     provide the ability for that - in a more real environment, you'd use
+     something like a single postgres install that all these haskell
+     processes talk to)
+
+       
+     
+other thoughts:
+
+ * probably should make fields strict by default? (as a good practice,
+   rather than to fix any bug: 
+
+> If a datatype contains data, it should usually be a strict field. If a datatype models control flow, then it should be a lazy field.
+  
+https://www.reddit.com/r/haskell/comments/9tm84m/how_can_i_become_comfortable_with_laziness_in/e8xfsze
