@@ -472,6 +472,14 @@ questions people asked:
        error messages to vary by error, which a test combiner using `or` or
        `and` doesn't - because a False value doesn't convey a reason.
 
+     - or accumulate using state monad so that we can return a whole list of
+       reasons this is invalid. this was pretty easy to implement with the
+       state monad from `mtl` - but this is also applicative: accumulate a
+       list of errors, none of which influence each other; then if the
+       accumulated state is [], return the Right booking, otherwise return
+       Left [accumulated errors]
+
+
   * how does this work in a cloud setting?
      you can run as many instances of this as you want and route requests
      to them. what needs to be shared? the database (and STM doesn't
@@ -489,3 +497,16 @@ other thoughts:
 > If a datatype contains data, it should usually be a strict field. If a datatype models control flow, then it should be a lazy field.
   
 https://www.reddit.com/r/haskell/comments/9tm84m/how_can_i_become_comfortable_with_laziness_in/e8xfsze
+
+from tokyo:
+
+* emphasis on "moving towards dependent types"
+
+* type level syntax compare to haskell syntax - "values at compile time" vs "values at runtime"
+    - in part 1, for constructing ping API and describing what we've done
+
+also show some type errors
+
+took:
+PostMan - windows GUI tool for creating/inspecting HTTP post requests
+
